@@ -1,4 +1,8 @@
 #!/bin/sh
 dest=generated/static/docs
-"$(yarn $YARN_FLAGS bin)/typedoc" --theme src/static/typedoc/ --out $dest src --ignoreCompilerErrors
+typedoc --out $dest src --ignoreCompilerErrors
+
+# Since theme is written with bogus access permissions
+find $dest/assets -type f -exec chmod a+w '{}' ';'
+
 cp -r $dest build/static/
