@@ -2,6 +2,9 @@
 
 set -e
 
+YARN_FLAGS=${YARN_FLAGS-""}
+echo Yarn flags are: $YARN_FLAGS
+
 CLEANSLATE="node_modules/cleanslate/docs/files/cleanslate.css"
 TRIDACTYL_LOGO="src/static/logo/Tridactyl_64px.png"
 
@@ -17,10 +20,6 @@ isWindowsMinGW() {
 
 if [ "$(isWindowsMinGW)" = "True" ]; then
   WIN_PYTHON="py -3"
-  YARN_BIN_DIR="$(cygpath "$(yarn bin)")"
-  PATH=$YARN_BIN_DIR:$PATH
-else
-  PATH="$(yarn bin):$PATH"
 fi
 
 export PATH
@@ -37,12 +36,12 @@ else
 fi
 
 # .bracketexpr.generated.ts is needed for metadata generation
-"$(yarn bin)/nearleyc" src/grammars/bracketexpr.ne > \
+"$(yarn $YARN_FLAGS bin)/nearleyc" src/grammars/bracketexpr.ne > \
   src/grammars/.bracketexpr.generated.ts
 
 # It's important to generate the metadata before the documentation because
 # missing imports might break documentation generation on clean builds
-"$(yarn bin)/tsc" compiler/gen_metadata.ts -m commonjs --target es2017 \
+"$(yarn $YARN_FLAGS bin)/tsc" compiler/gen_metadata.ts -m commonjs --target es2017 \
   && node compiler/gen_metadata.js \
           --out src/.metadata.generated.ts \
           --themeDir src/static/themes \
@@ -62,7 +61,7 @@ else
   native/install.sh local
 fi
 
-(webpack --display errors-only --bail\
+("$(yarn $YARN_FLAGS bin)/webpack" --display errors-only --bail\
   && scripts/git_version.sh)
 
 scripts/bodgecss.sh
